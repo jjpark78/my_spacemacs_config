@@ -1,7 +1,4 @@
 * My Spacemacs Configuration
-
-** Layers Configuration
-
 *** Auto Completion
 #+BEGIN_SRC elisp 
    (auto-completion :variables
@@ -166,7 +163,7 @@
   (global-set-key (kbd "C-S-k") 'drag-stuff-up)
   (global-set-key (kbd "C-S-j") 'drag-stuff-down)
 #+END_SRC
-**** Move Head / End of Line faster
+**** Move to Head / End of Line faster
 #+BEGIN_SRC elisp
   (evil-global-set-key 'normal "H" 'evil-first-non-blank)
   (evil-global-set-key 'visual "H" 'evil-first-non-blank)
