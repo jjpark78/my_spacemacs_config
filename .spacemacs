@@ -60,14 +60,13 @@
      (node :variables node-add-modules-path t)
      themes-megapack
      version-control
-     themes-megapack
      (treemacs :variables
                treemacs-use-filewatch-mode t
                treemacs-use-follow-mode t
                treemacs-use-scope-type 'Perspectives
                treemacs-use-git-mode 'extended)
      (wakatime :variables
-               wakatime-api-key  "c6ba049d-8360-45fd-8317-a4b25d0ab860"
+               ;; wakatime-api-key "c6ba049d-8360-45fd-8317-a4b25d0ab860"
                ;; use the actual wakatime path
                wakatime-cli-path "/usr/local/bin/wakatime")
     )
@@ -80,6 +79,8 @@
      beacon
      helm-icons
      rg
+     carbon-now-sh
+     dimmer
    )
    dotspacemacs-frozen-packages '()
    dotspacemacs-excluded-packages '()
@@ -148,77 +149,218 @@
    ))
 
 (defun dotspacemacs/user-init ()
+  ;; load shell config file custom function
+  (defun er-find-shell-init-file ()
+    "Edit the shell init file in another window"
+    (interactive)
+    (let* ((shell (car (reverse (split-string (getenv "SHELL") "/"))))
+           (shell-init-file (cond
+                             ((string-equal "zsh" shell) ".zshrc")
+                             ((string-equal "bash" shell) ".bashrc")
+                             (t (error "Unkown shell")))))
+      (find-file-other-window (expand-file-name shell-init-file (getenv "HOME")))))
+
+  ;; save/read windows layout
+  ;; 구글링을 한 끝에 찾아낸 유용한 함수들
+  ;; 이하의 함수들은 이맥스가 시작하고 종료될때 훅으로 실행되도록
+  ;; general.el파일에 설정이 들어가 있다.
+  (defun save-framegeometry ()
+    "Gets the current frame's geometry and saves to ~/.emacs.d/framegeometry."
+    (let (
+          (framegeometry-left (frame-parameter (selected-frame) 'left))
+          (framegeometry-top (frame-parameter (selected-frame) 'top))
+          (framegeometry-width (frame-parameter (selected-frame) 'width))
+          (framegeometry-height (frame-parameter (selected-frame) 'height))
+          (framegeometry-file (expand-file-name "~/.emacs.d/framegeometry"))
+          )
+
+      (when (not (number-or-marker-p framegeometry-left))
+        (setq framegeometry-left 0))
+      (when (not (number-or-marker-p framegeometry-top))
+        (setq framegeometry-top 0))
+      (when (not (number-or-marker-p framegeometry-width))
+        (setq framegeometry-width 0))
+      (when (not (number-or-marker-p framegeometry-height))
+        (setq framegeometry-height 0))
+
+      (with-temp-buffer
+        (insert
+         ";;; This is the previous emacs frame's geometry.\n"
+         ";;; Last generated " (current-time-string) ".\n"
+         "(setq initial-frame-alist\n"
+         "      '(\n"
+         (format "        (top . %d)\n" (max framegeometry-top 0))
+         (format "        (left . %d)\n" (max framegeometry-left 0))
+         (format "        (width . %d)\n" (max framegeometry-width 0))
+         (format "        (height . %d)))\n" (max framegeometry-height 0)))
+         (when (file-writable-p framegeometry-file)
+         (write-file framegeometry-file))))
+  )
+
+  (defun load-framegeometry ()
+    (let ((framegeometry-file (expand-file-name "~/.emacs.d/framegeometry")))
+      (when (file-readable-p framegeometry-file)
+        (load-file framegeometry-file)))
+  )
   )
 
 (defun dotspacemacs/user-config ()
+  ;; setup my profile
+  (setq user-full-name "Jaejin Park")
+  (setq user-mail-address "jjpark78@outlook.com")
+  (setq echo-keystrokes 0.001)
+
+  ;;이맥스 종료할때 그냥 묻지도 따지지도 말고 종료하도록 했다.
+  (setq confirm-kill-processes nil)
+
+  ;; display time globally
+  (display-time)
+
+  ;; load previous window position
+  ;; Restore Frame size and location, if we are using gui emacs
+  (if window-system
+      (progn
+        (add-hook 'after-init-hook 'load-framegeometry)
+        (add-hook 'kill-emacs-hook 'save-framegeometry))
+    )
+
+  ;; 이맥스를 맥에서 쓰다보면 스크롤이 엄청 느려지는 경우가 있다.
+  ;; 여러 이슈들을 확인한 결과 어쩔수 없다 함.
+  ;; 해당 현상을 완화하는데 조금이나마 도움이 된다하여서
+  ;; 구글링을 통해 찾은 각종 튜닝들을 여기다가 넣어 놓았다.
+  (setq scroll-conservatively 101)
+  (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
+
   ;; setup lsp fine tune
   (setq gc-cons-threshold 100000000)
   (setq read-process-output-max (* 1024 1024)) ;; 1mb
   (setq lsp-completion-provider :capf)
   (setq lsp-idle-delay 0.500)
+
   ;;iedit bug
   ;;need to wait for https://github.com/syl20bnr/evil-iedit-state/issues/27 releases
   (defalias 'iedit-cleanup 'iedit-lib-cleanup)
+
   ;;display guide line
   (setq-default
    ;; indent guide mode
    indent-guide-global-mode nil
    display-line-numbers-width 5
    display-line-numbers-width-start 5
-   ;; use smartparens strict mode
-   ;; dotspacemacs-smartparens-strict-mode t
    )
-  ;; change line number format
-  ;; (setq linum-format "%5d")
+
   ;; config evil-smartparens package
   (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode)
+
+  ;; nyan-mode
   (nyan-mode)
   (setq nyan-animate-nyancat t)
+
+  ;; add icons to helm
   (helm-icons-enable)
   (treemacs-resize-icons 16)
+
+  ;; flycheck setup
   (global-flycheck-mode)
-  ;;my key binding
+
+  ;; Keep file in sync
+  (global-auto-revert-mode 1)
+
+  ;; dimmer config
+  (dimmer-mode t)
+  (setq dimmer-fraction 0.1)
+
+  ;; misc config
+  (setq global-auto-revert-non-file-buffers t)
+  (setq auto-revert-verbose nil)
+  (setq revert-without-query '(".*"))
+  (setq tab-always-indent t)
+  (setq auth-sources '("~/.config/authrc"))
+
+  ;;make spaceline more lighten
+  (with-eval-after-load 'spaceline-segments
+    (spaceline-toggle-minor-modes-off)
+    (spaceline-toggle-buffer-size-off))
+
+  ;; let diff to delta mode
+  (magit-delta-mode)
+
+  ;; powerline seperator
+  (setq dotspacemacs-mode-line-theme '(all-the-icons :separator wave))
+
+  ;; activate beacon
+  (beacon-mode 1)
+
+  ;; setup korean
+  (set-language-environment "Korean")
+  (prefer-coding-system 'utf-8)
+
+  ;; only use magit
+  (setq vc-handled-backends nil)
+
+  ;; vc, magit config
+  (setq vc-follow-symlinks t)
+  (setq find-file-visit-truename t)
+  (setq magit-refresh-status-buffer 'switch-to-buffer)
+  (setq magit-rewrite-inclusive 'ask)
+  (setq magit-save-some-buffers t)
+  (setq magit-set-upstream-on-push 'askifnotset)
+
+  ;; rg setup
+  (setq rg-group-result t)
+  (setq rg-hide-command t)
+  (setq rg-show-columns nil)
+  (setq rg-show-header t)
+  (setq rg-custom-type-aliases nil)
+  (setq rg-default-alias-fallback "all")
+
+  ;; my key binding
+  ;; not working
   (setq-default evil-escape-key-sequence "jj")
+
+  ;; surround binding
   (evil-define-key 'visual evil-surround-mode-map "s" 'evil-substitute)
   (evil-define-key 'visual evil-surround-mode-map "S" 'evil-surround-region)
+
+  ;; line move binding
   (global-set-key (kbd "C-S-k") 'drag-stuff-up)
   (global-set-key (kbd "C-S-j") 'drag-stuff-down)
+
+  ;; buffer list
   (global-set-key (kbd "C-,") 'helm-projectile-switch-to-buffer)
+
+  ;; move line head, end faster
   (evil-global-set-key 'normal "H" 'evil-first-non-blank)
   (evil-global-set-key 'visual "H" 'evil-first-non-blank)
   (evil-global-set-key 'motion "H" 'evil-first-non-blank)
   (evil-global-set-key 'normal "L" (lambda () (interactive) (evil-end-of-line)))
   (evil-global-set-key 'visual "L" (lambda () (interactive) (evil-end-of-line)))
   (evil-global-set-key 'motion "L" (lambda () (interactive) (evil-end-of-line)))
+
+  ;; jump to position faster
   (define-key evil-motion-state-map "gl" 'evil-avy-goto-line)
   (define-key evil-normal-state-map "gl" 'evil-avy-goto-line)
   (define-key evil-motion-state-map "gw" 'evil-avy-goto-char-2)
   (define-key evil-normal-state-map "gw" 'evil-avy-goto-char-2)
-  ;;Keep files in sync
-  (global-auto-revert-mode 1)
-  (setq global-auto-revert-non-file-buffers t)
-  (setq auto-revert-verbose nil)
-  (setq revert-without-query '(".*"))
-  (setq tab-always-indent t)
-  (setq auth-sources '("~/.config/authrc"))
-  (with-eval-after-load 'spaceline-segments
-    (spaceline-toggle-minor-modes-off)
-    (spaceline-toggle-buffer-size-off))
+
+  ;; add dired move subdirectory
   (with-eval-after-load 'dired
     (evil-define-key 'normal dired-mode-map
       "h" 'dired-up-directory
       "l" 'dired-find-file))
-  ;; let diff to delta mode
-  (magit-delta-mode)
-  ;; powerline seperator
-  (setq dotspacemacs-mode-line-theme '(all-the-icons :separator wave))
-  ;; activate beacon
-  (beacon-mode 1)
-  ;; setup korean
-  (set-language-environment "Korean")
-  (prefer-coding-system 'utf-8)
-  ;; setup rg modes
+
+  ;; setup rg binding
   (spacemacs/set-leader-keys "rg" 'rg-project)
+
+  ;; setup edit shell config file shortcut
+  (spacemacs/set-leader-keys "fz" 'er-find-shell-init-file)
+
+  ;; setup carbon now sh binding
+  (spacemacs/set-leader-keys "cB" 'carbon-now-sh)
+
+  ;; setup wakatime api key
+  ;; (setq wakatime-api-key "c6ba049d-8360-45fd-8317-a4b25d0ab860")
+  (load "~/.config/spacemacs/wakatime")
 )
 
 (defun dotspacemacs/emacs-custom-settings ()
