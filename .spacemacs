@@ -218,11 +218,8 @@
 
   ;; load previous window position
   ;; Restore Frame size and location, if we are using gui emacs
-  (if window-system
-      (progn
-        (add-hook 'after-init-hook 'load-framegeometry)
-        (add-hook 'kill-emacs-hook 'save-framegeometry))
-    )
+  (add-hook 'after-init-hook 'load-framegeometry)
+  (add-hook 'kill-emacs-hook 'save-framegeometry)
 
   ;; 이맥스를 맥에서 쓰다보면 스크롤이 엄청 느려지는 경우가 있다.
   ;; 여러 이슈들을 확인한 결과 어쩔수 없다 함.
