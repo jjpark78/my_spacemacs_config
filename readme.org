@@ -41,6 +41,8 @@
         web-mode-attr-indent-offset 2
         vue-backend 'lsp)
 #+END_SRC 
+*** Wakatime
+   API-KEY는 노출을 막기위해 별도의 파일로 관리한다. 
 #+BEGIN_SRC elisp
    (wakatime :variables
              ;; use the actual wakatime path
