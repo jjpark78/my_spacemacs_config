@@ -45,8 +45,20 @@
              ;; use the actual wakatime path
              wakatime-cli-path "/usr/local/bin/wakatime")
 #+END_SRC
-
-** Custom Setup 
+*** Extra Packages
+#+BEGIN_SRC elisp
+   dotspacemacs-additional-packages '(
+     nyan-mode
+     drag-stuff
+     magit-delta
+     evil-smartparens
+     beacon
+     helm-icons
+     rg
+     carbon-now-sh
+     dimmer
+   )
+#+END_SRC
 *** Custom Function
 **** Edit Shell init file
 #+BEGIN_SRC elisp

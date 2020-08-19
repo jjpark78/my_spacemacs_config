@@ -212,6 +212,9 @@
   ;;이맥스 종료할때 그냥 묻지도 따지지도 말고 종료하도록 했다.
   (setq confirm-kill-processes nil)
 
+  ;; make support CamelCase Syntax
+  (global-subword-mode 1)
+
   ;; display time globally
   (display-time)
 
@@ -275,6 +278,9 @@
 
   ;;make spaceline more lighten
   (with-eval-after-load 'spaceline-segments
+    (spaceline-toggle-anzu-off)
+    (spaceline-toggle-battery-off)
+    (spaceline-toggle-buffer-position-off)
     (spaceline-toggle-minor-modes-off)
     (spaceline-toggle-buffer-size-off))
 
