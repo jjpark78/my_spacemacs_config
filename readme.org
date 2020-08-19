@@ -1,1 +1,108 @@
 * My Spacemacs Configuration
+
+** Layers Configuration
+
+*** Auto Completion
+#+BEGIN_SRC elisp 
+   (auto-completion :variables
+                    auto-completion-front-end 'company
+                    auto-completion-tab-key-behavior 'cycle
+                    auto-completion-complete-with-key-sequence-delay 0
+                    auto-completion-enable-snippets-in-popup t
+                    auto-completion-usr-company-box t
+                    auto-completion-enable-sort-by-usage t)
+                    ;; auto-completion-enable-tabnine t)
+#+END_SRC
+*** Typescript / Javascript 
+#+BEGIN_SRC elisp
+   (javascript :variables
+               javascript-indent-level 2
+               javascript-backend 'lsp)
+   (typescript :variables
+               typescript-indent-level 2
+               typescript-backend 'lsp
+               typescript-linter 'eslint
+               typescript-fmt-tool 'prettier)
+#+END_SRC
+*** ORG Mode
+#+BEGIN_SRC elisp
+   (org :variables
+        org-enable-github-support t
+        org-enable-bootstrap-support t
+        org-projectile-file "TODOs.org"
+        org-enable-epub-support t)
+#+END_SRC
+*** Frontend Vue.js 
+#+BEGIN_SRC elisp
+   (vue :variables
+        web-mode-markup-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-code-indent-offset 2
+        web-mode-attr-indent-offset 2
+        vue-backend 'lsp)
+#+END_SRC 
+#+BEGIN_SRC elisp
+   (wakatime :variables
+             ;; use the actual wakatime path
+             wakatime-cli-path "/usr/local/bin/wakatime")
+#+END_SRC
+
+** Custom Setup 
+*** Custom Function
+**** Edit Shell init file
+#+BEGIN_SRC elisp
+  (defun er-find-shell-init-file ()
+    "Edit the shell init file in another window"
+    (interactive)
+    (let* ((shell (car (reverse (split-string (getenv "SHELL") "/"))))
+           (shell-init-file (cond
+                             ((string-equal "zsh" shell) ".zshrc")
+                             ((string-equal "bash" shell) ".bashrc")
+                             (t (error "Unkown shell")))))
+      (find-file-other-window (expand-file-name shell-init-file (getenv "HOME")))))
+#+END_SRC 
+**** Save/Load Previous Emacs Window Position
+#+BEGIN_SRC elisp
+  ;; save/read windows layout
+  ;; 구글링을 한 끝에 찾아낸 유용한 함수들
+  ;; 이하의 함수들은 이맥스가 시작하고 종료될때 훅으로 실행되도록
+  ;; general.el파일에 설정이 들어가 있다.
+  (defun save-framegeometry ()
+    "Gets the current frame's geometry and saves to ~/.emacs.d/framegeometry."
+    (let (
+          (framegeometry-left (frame-parameter (selected-frame) 'left))
+          (framegeometry-top (frame-parameter (selected-frame) 'top))
+          (framegeometry-width (frame-parameter (selected-frame) 'width))
+          (framegeometry-height (frame-parameter (selected-frame) 'height))
+          (framegeometry-file (expand-file-name "~/.emacs.d/framegeometry"))
+          )
+
+      (when (not (number-or-marker-p framegeometry-left))
+        (setq framegeometry-left 0))
+      (when (not (number-or-marker-p framegeometry-top))
+        (setq framegeometry-top 0))
+      (when (not (number-or-marker-p framegeometry-width))
+        (setq framegeometry-width 0))
+      (when (not (number-or-marker-p framegeometry-height))
+        (setq framegeometry-height 0))
+
+      (with-temp-buffer
+        (insert
+         ";;; This is the previous emacs frame's geometry.\n"
+         ";;; Last generated " (current-time-string) ".\n"
+         "(setq initial-frame-alist\n"
+         "      '(\n"
+         (format "        (top . %d)\n" (max framegeometry-top 0))
+         (format "        (left . %d)\n" (max framegeometry-left 0))
+         (format "        (width . %d)\n" (max framegeometry-width 0))
+         (format "        (height . %d)))\n" (max framegeometry-height 0)))
+         (when (file-writable-p framegeometry-file)
+         (write-file framegeometry-file))))
+  )
+
+  (defun load-framegeometry ()
+    (let ((framegeometry-file (expand-file-name "~/.emacs.d/framegeometry")))
+      (when (file-readable-p framegeometry-file)
+        (load-file framegeometry-file)))
+  )
+#+END_SRC

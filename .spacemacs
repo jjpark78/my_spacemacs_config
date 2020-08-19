@@ -66,7 +66,6 @@
                treemacs-use-scope-type 'Perspectives
                treemacs-use-git-mode 'extended)
      (wakatime :variables
-               ;; wakatime-api-key "c6ba049d-8360-45fd-8317-a4b25d0ab860"
                ;; use the actual wakatime path
                wakatime-cli-path "/usr/local/bin/wakatime")
     )
