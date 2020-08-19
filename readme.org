@@ -108,3 +108,82 @@
         (load-file framegeometry-file)))
   )
 #+END_SRC
+*** Custom Setqs
+**** Fine Tune for Performance
+#+BEGIN_SRC elisp
+  (setq echo-keystrokes 0.001)
+
+  ;; 이맥스를 맥에서 쓰다보면 스크롤이 엄청 느려지는 경우가 있다.
+  ;; 여러 이슈들을 확인한 결과 어쩔수 없다 함.
+  ;; 해당 현상을 완화하는데 조금이나마 도움이 된다하여서
+  ;; 구글링을 통해 찾은 각종 튜닝들을 여기다가 넣어 놓았다.
+  (setq scroll-conservatively 101)
+  (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
+
+  ;; setup lsp fine tune
+  (setq gc-cons-threshold 100000000)
+  (setq read-process-output-max (* 1024 1024)) ;; 1mb
+  (setq lsp-completion-provider :capf)
+  (setq lsp-idle-delay 0.500)
+#+END_SRC
+**** Make Spaceline more simple
+#+BEGIN_SRC elisp
+  (with-eval-after-load 'spaceline-segments
+    (spaceline-toggle-minor-modes-off)
+    (spaceline-toggle-buffer-size-off))
+#+END_SRC
+**** Magit  
+#+BEGIN_SRC elisp
+  ;; vc, magit config
+  (setq vc-follow-symlinks t)
+  (setq find-file-visit-truename t)
+  (setq magit-refresh-status-buffer 'switch-to-buffer)
+  (setq magit-rewrite-inclusive 'ask)
+  (setq magit-save-some-buffers t)
+  (setq magit-set-upstream-on-push 'askifnotset)
+#+END_SRC
+**** Rg  
+#+BEGIN_SRC elisp
+  ;; rg setup
+  (setq rg-group-result t)
+  (setq rg-hide-command t)
+  (setq rg-show-columns nil)
+  (setq rg-show-header t)
+  (setq rg-custom-type-aliases nil)
+  (setq rg-default-alias-fallback "all")
+#+END_SRC
+
+*** Custom Bindings
+**** Surrond
+#+BEGIN_SRC elisp
+  ;; surround binding
+  (evil-define-key 'visual evil-surround-mode-map "s" 'evil-substitute)
+  (evil-define-key 'visual evil-surround-mode-map "S" 'evil-surround-region)
+#+END_SRC 
+**** Line or Block Move Up/Down
+#+BEGIN_SRC elisp
+  ;; line move binding
+  (global-set-key (kbd "C-S-k") 'drag-stuff-up)
+  (global-set-key (kbd "C-S-j") 'drag-stuff-down)
+#+END_SRC
+**** Move Head / End of Line faster
+#+BEGIN_SRC elisp
+  (evil-global-set-key 'normal "H" 'evil-first-non-blank)
+  (evil-global-set-key 'visual "H" 'evil-first-non-blank)
+  (evil-global-set-key 'motion "H" 'evil-first-non-blank)
+  (evil-global-set-key 'normal "L" (lambda () (interactive) (evil-end-of-line)))
+  (evil-global-set-key 'visual "L" (lambda () (interactive) (evil-end-of-line)))
+  (evil-global-set-key 'motion "L" (lambda () (interactive) (evil-end-of-line)))
+#+END_SRC
+**** Jump Line or 2 Char Faster 
+#+BEGIN_SRC elisp
+  (define-key evil-motion-state-map "gl" 'evil-avy-goto-line)
+  (define-key evil-normal-state-map "gl" 'evil-avy-goto-line)
+  (define-key evil-motion-state-map "gw" 'evil-avy-goto-char-2)
+  (define-key evil-normal-state-map "gw" 'evil-avy-goto-char-2)
+#+END_SRC
+*** Custom Faces 
+**** Helm Selection more Readable
+#+BEGIN_SRC elisp
+  (helm-selection ((t (:extend t :background "VioletRed4" :foreground "gray100" :inverse-video nil))))
+#+END_SRC
