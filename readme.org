@@ -191,6 +191,10 @@
   (define-key evil-motion-state-map "gw" 'evil-avy-goto-char-2)
   (define-key evil-normal-state-map "gw" 'evil-avy-goto-char-2)
 #+END_SRC
+**** Doom Emacs style Buffer list 
+#+BEGIN_SRC elisp
+  (spacemacs/set-leader-keys "," 'helm-projectile-switch-to-buffer)
+#+END_SRC
 *** Custom Faces 
 **** Helm Selection more Readable
 #+BEGIN_SRC elisp

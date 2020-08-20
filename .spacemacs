@@ -42,6 +42,7 @@
           org-projectile-file "TODOs.org"
           org-enable-epub-support t)
      markdown
+     dash
      yaml
      (syntax-checking :variables
                       syntax-checking-enable-tooltips t)
@@ -80,6 +81,7 @@
      rg
      carbon-now-sh
      dimmer
+     quelpa
    )
    dotspacemacs-frozen-packages '()
    dotspacemacs-excluded-packages '()
@@ -199,6 +201,7 @@
   (defun load-framegeometry ()
     (let ((framegeometry-file (expand-file-name "~/.emacs.d/framegeometry")))
       (when (file-readable-p framegeometry-file)
+        (message "Load frame geometry from file")
         (load-file framegeometry-file)))
   )
   )
@@ -207,7 +210,6 @@
   ;; setup my profile
   (setq user-full-name "Jaejin Park")
   (setq user-mail-address "jjpark78@outlook.com")
-  (setq echo-keystrokes 0.001)
 
   ;;이맥스 종료할때 그냥 묻지도 따지지도 말고 종료하도록 했다.
   (setq confirm-kill-processes nil)
@@ -281,6 +283,7 @@
     (spaceline-toggle-anzu-off)
     (spaceline-toggle-battery-off)
     (spaceline-toggle-buffer-position-off)
+    (spaceline-toggle-point-position-off)
     (spaceline-toggle-minor-modes-off)
     (spaceline-toggle-buffer-size-off))
 
@@ -318,7 +321,7 @@
 
   ;; my key binding
   ;; not working
-  (setq-default evil-escape-key-sequence "jj")
+  ;; (setq-default evil-escape-key-sequence "jj")
 
   ;; surround binding
   (evil-define-key 'visual evil-surround-mode-map "s" 'evil-substitute)
@@ -329,7 +332,8 @@
   (global-set-key (kbd "C-S-j") 'drag-stuff-down)
 
   ;; buffer list
-  (global-set-key (kbd "C-,") 'helm-projectile-switch-to-buffer)
+  ;; doom emacs style
+  (spacemacs/set-leader-keys "," 'helm-projectile-switch-to-buffer)
 
   ;; move line head, end faster
   (evil-global-set-key 'normal "H" 'evil-first-non-blank)
@@ -361,7 +365,6 @@
   (spacemacs/set-leader-keys "cB" 'carbon-now-sh)
 
   ;; setup wakatime api key
-  ;; (setq wakatime-api-key "c6ba049d-8360-45fd-8317-a4b25d0ab860")
   (load "~/.config/spacemacs/wakatime")
 )
 
