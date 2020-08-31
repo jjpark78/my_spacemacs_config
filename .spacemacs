@@ -17,14 +17,16 @@
                       auto-completion-enable-snippets-in-popup t
                       auto-completion-usr-company-box t
                       auto-completion-enable-sort-by-usage t
-                      spacemacs-default-company-backends '(company-tabnine company-files company-capf))
+                      )
                       ;; auto-completion-enable-tabnine t)
      (javascript :variables
                  javascript-indent-level 2
+                 lsp-headerline-breadcrumb-enable t
                  javascript-backend 'lsp)
      (typescript :variables
                  typescript-indent-level 2
                  typescript-backend 'lsp
+                 lsp-headerline-breadcrumb-enable t
                  typescript-linter 'eslint
                  typescript-fmt-tool 'prettier)
      helm
@@ -58,9 +60,9 @@
           web-mode-css-indent-offset 2
           web-mode-code-indent-offset 2
           web-mode-attr-indent-offset 2
+          lsp-headerline-breadcrumb-enable t
           vue-backend 'lsp)
      (node :variables node-add-modules-path t)
-     themes-megapack
      version-control
      (treemacs :variables
                treemacs-use-filewatch-mode t
@@ -82,10 +84,9 @@
      rg
      carbon-now-sh
      dimmer
-     quelpa
-     company-box
-     company-tabnine
-     company-quickhelp
+     ;; quelpa
+     ;; company-tabnine
+     ;; company-quickhelp
    )
    dotspacemacs-frozen-packages '()
    dotspacemacs-excluded-packages '()
@@ -211,37 +212,36 @@
   )
 
 (defun dotspacemacs/user-config ()
+  ;; for emacsclient
+  (setq scroll-bar-mode nil)
+  ;; (setq ns-use-srgb-colorspace nil)
+  (spacemacs/load-theme 'spacemacs-dark)
   ;; setup my profile
   (setq user-full-name "Jaejin Park")
   (setq user-mail-address "jjpark78@outlook.com")
 
   ;;이맥스 종료할때 그냥 묻지도 따지지도 말고 종료하도록 했다.
   (setq confirm-kill-processes nil)
+  (setq confirm-kill-emacs nil)
 
   ;; make support CamelCase Syntax
   (global-subword-mode 1)
+
+  (spacemacs|do-after-display-system-init
+   (setq powerline-default-separator 'slant))
 
   ;; display time globally
   (spaceline-define-segment datetime
     (shell-command-to-string "echo -n $(date +'%Y-%m-%d %a %T')"))
   (spaceline-spacemacs-theme 'datetime)
-
   ;; load previous window position
   ;; Restore Frame size and location, if we are using gui emacs
   (add-hook 'after-init-hook 'load-framegeometry)
   (add-hook 'kill-emacs-hook 'save-framegeometry)
 
-  ;; 이맥스를 맥에서 쓰다보면 스크롤이 엄청 느려지는 경우가 있다.
-  ;; 여러 이슈들을 확인한 결과 어쩔수 없다 함.
-  ;; 해당 현상을 완화하는데 조금이나마 도움이 된다하여서
-  ;; 구글링을 통해 찾은 각종 튜닝들을 여기다가 넣어 놓았다.
-  (setq scroll-conservatively 101)
-  (add-to-list 'default-frame-alist '(inhibit-double-buffering . t))
-
   ;; setup lsp fine tune
   (setq gc-cons-threshold 100000000)
   (setq read-process-output-max (* 1024 1024)) ;; 1mb
-  (setq lsp-completion-provider :capf)
   (setq lsp-idle-delay 0.500)
 
   ;;iedit bug
@@ -261,63 +261,27 @@
    display-line-numbers-width-start 5
    )
 
-  ;; add company-box-mode
-  ;; (add-hook 'company-mode-hook 'company-box-mode)
-
-
-  ;; `((Unknown       . ,(all-the-icons-material "find_in_page"             :face 'all-the-icons-purple))
-  ;;   (Text          . ,(all-the-icons-material "text_fields"              :face 'all-the-icons-green))
-  ;;   (Method        . ,(all-the-icons-material "functions"                :face 'all-the-icons-yellow))
-  ;;   (Function      . ,(all-the-icons-material "functions"                :face 'all-the-icons-yellow))
-  ;;   (Constructor   . ,(all-the-icons-material "functions"                :face 'all-the-icons-yellow))
-  ;;   (Field         . ,(all-the-icons-material "functions"                :face 'all-the-icons-yellow))
-  ;;   (Variable      . ,(all-the-icons-material "adjust"                   :face 'all-the-icons-blue))
-  ;;   (Class         . ,(all-the-icons-material "class"                    :face 'all-the-icons-cyan))
-  ;;   (Interface     . ,(all-the-icons-material "settings_input_component" :face 'all-the-icons-cyan))
-  ;;   (Module        . ,(all-the-icons-material "view_module"              :face 'all-the-icons-cyan))
-  ;;   (Property      . ,(all-the-icons-material "settings"                 :face 'all-the-icons-lorange))
-  ;;   (Unit          . ,(all-the-icons-material "straighten"               :face 'all-the-icons-red))
-  ;;   (Value         . ,(all-the-icons-material "filter_1"                 :face 'all-the-icons-red))
-  ;;   (Enum          . ,(all-the-icons-material "plus_one"                 :face 'all-the-icons-lorange))
-  ;;   (Keyword       . ,(all-the-icons-material "filter_center_focus"      :face 'all-the-icons-lgreen))
-  ;;   (Snippet       . ,(all-the-icons-material "short_text"               :face 'all-the-icons-lblue))
-  ;;   (Color         . ,(all-the-icons-material "color_lens"               :face 'all-the-icons-green))
-  ;;   (File          . ,(all-the-icons-material "insert_drive_file"        :face 'all-the-icons-green))
-  ;;   (Reference     . ,(all-the-icons-material "collections_bookmark"     :face 'all-the-icons-silver))
-  ;;   (Folder        . ,(all-the-icons-material "folder"                   :face 'all-the-icons-green))
-  ;;   (EnumMember    . ,(all-the-icons-material "people"                   :face 'all-the-icons-lorange))
-  ;;   (Constant      . ,(all-the-icons-material "pause_circle_filled"      :face 'all-the-icons-blue))
-  ;;   (Struct        . ,(all-the-icons-material "streetview"               :face 'all-the-icons-blue))
-  ;;   (Event         . ,(all-the-icons-material "event"                    :face 'all-the-icons-yellow))
-  ;;   (Operator      . ,(all-the-icons-material "control_point"            :face 'all-the-icons-red))
-  ;;   (TypeParameter . ,(all-the-icons-material "class"                    :face 'all-the-icons-red))
-  ;;   (Template      . ,(all-the-icons-material "short_text"               :face 'all-the-icons-green))
-  ;;   (ElispFunction . ,(all-the-icons-material "functions"                :face 'all-the-icons-red))
-  ;;   (ElispVariable . ,(all-the-icons-material "check_circle"             :face 'all-the-icons-blue))
-  ;;   (ElispFeature  . ,(all-the-icons-material "stars"                    :face 'all-the-icons-orange))
-  ;;   (ElispFace     . ,(all-the-icons-material "format_paint"             :face 'all-the-icons-pink)))))))
-
   ;; Show quick tooltip
-  (use-package company-quickhelp
-    :defines company-quickhelp-delay
-    :bind (:map company-active-map
-                ("M-h" . company-quickhelp-manual-begin))
-    :hook (global-company-mode . company-quickhelp-mode)
-    :custom (company-quickhelp-delay 0.8))
+  ;; (use-package company-quickhelp
+  ;;   :defines company-quickhelp-delay
+  ;;   :bind (:map company-active-map
+  ;;               ("M-h" . company-quickhelp-manual-begin))
+  ;;   :hook (global-company-mode . company-quickhelp-mode)
+  ;;   :custom (company-quickhelp-delay 0.8))
 
   ;; config evil-smartparens package
   (add-hook 'smartparens-enabled-hook #'evil-smartparens-mode)
 
   ;; nyan-mode
   (nyan-mode)
-  (setq nyan-animate-nyancat t)
+  (nyan-start-animation)
 
   ;; add icons to helm
   (helm-icons-enable)
   (treemacs-resize-icons 16)
 
   ;; flycheck setup
-  (global-flycheck-mode)
+  ;; (global-flycheck-mode)
 
   ;; Keep file in sync
   (global-auto-revert-mode 1)
@@ -337,8 +301,12 @@
   (with-eval-after-load 'spaceline-segments
     (spaceline-toggle-anzu-off)
     (spaceline-toggle-battery-off)
-    (spaceline-toggle-buffer-position-off)
-    (spaceline-toggle-point-position-off)
+    (spaceline-toggle-buffer-position-on)
+    (spaceline-toggle-point-position-on)
+    (spaceline-toggle-persp-name-off)
+    (spaceline-toggle-all-the-icons-vc-status-on)
+    (spaceline-toggle-all-the-icons-git-status-on)
+    (spaceline-toggle-all-the-icons-vc-icon-on)
     (spaceline-toggle-minor-modes-off)
     (spaceline-toggle-buffer-size-off))
 
@@ -346,7 +314,7 @@
   (magit-delta-mode)
 
   ;; powerline seperator
-  (setq dotspacemacs-mode-line-theme '(all-the-icons :separator wave))
+  (setq dotspacemacs-mode-line-theme '(all-the-icons :separator 'slant))
 
   ;; activate beacon
   (beacon-mode 1)
@@ -389,7 +357,10 @@
   ;; buffer list
   ;; doom emacs style
   (spacemacs/set-leader-keys "," 'helm-projectile-switch-to-buffer)
+  ;; for emacsclient and daemon mode
 
+  (spacemacs/set-leader-keys "qq" 'spacemacs/frame-killer)
+  (spacemacs/set-leader-keys "," 'helm-projectile-switch-to-buffer)
   ;; move line head, end faster
   (evil-global-set-key 'normal "H" 'evil-first-non-blank)
   (evil-global-set-key 'visual "H" 'evil-first-non-blank)
@@ -407,10 +378,10 @@
   (define-key evil-normal-state-map "gb" 'evil-jump-backward)
 
   ;; add dired move subdirectory
-  (with-eval-after-load 'dired
-    (evil-define-key 'normal dired-mode-map
-      "h" 'dired-up-directory
-      "l" 'dired-find-file))
+  ;; (with-eval-after-load 'dired
+  ;;   (evil-define-key 'normal dired-mode-map
+  ;;     "h" 'dired-up-directory
+  ;;     "l" 'dired-find-file))
 
   ;; setup rg binding
   (spacemacs/set-leader-keys "rg" 'rg-project)
@@ -423,41 +394,51 @@
 
   ;; setup wakatime api key
   (load "~/.config/spacemacs/wakatime")
-)
+
+  ;; setup centaur tab
+  ;; (use-package centaur-tabs
+  ;;   :ensure t
+  ;;   :demand
+  ;;   :config
+  ;;   (centaur-tabs-mode t)
+  ;;   )
+  ;; (global-set-key (kbd "gt")  'centaur-tabs-forward)
+  ;; (global-set-key (kbd "gT")  'centaur-tabs-backward)
+  )
 
 (defun dotspacemacs/emacs-custom-settings ()
-   (custom-set-variables
-      '(blink-cursor-mode nil)
-      '(column-number-mode t)
-      '(custom-safe-themes
-        '("bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "d74c5485d42ca4b7f3092e50db687600d0e16006d8fa335c69cf4f379dbd0eee" default))
-      '(display-line-numbers-type 'relative)
-      '(evil-want-Y-yank-to-eol nil)
-      '(global-display-line-numbers-mode t)
-      '(hl-todo-keyword-faces
-        '(("TODO" . "#dc752f")
-          ("NEXT" . "#dc752f")
-          ("THEM" . "#2d9574")
-          ("PROG" . "#4f97d7")
-          ("OKAY" . "#4f97d7")
-          ("DONT" . "#f2241f")
-          ("FAIL" . "#f2241f")
-          ("DONE" . "#86dc2f")
-          ("NOTE" . "#b1951d")
-          ("KLUDGE" . "#b1951d")
-          ("HACK" . "#b1951d")
-          ("TEMP" . "#b1951d")
-          ("FIXME" . "#dc752f")
-          ("XXX+" . "#dc752f")
-          ("\\?\\?\\?+" . "#dc752f")))
-      '(package-selected-packages
-        '(zenburn-theme zen-and-art-theme white-sand-theme web-mode underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme slim-mode seti-theme scss-mode sass-mode reverse-theme rebecca-theme railscasts-theme purple-haze-theme pug-mode professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme modus-vivendi-theme modus-operandi-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme kaolin-themes jbeans-theme jazz-theme ir-black-theme inkpot-theme impatient-mode htmlize heroku-theme hemisu-theme helm-css-scss hc-zenburn-theme haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme eziam-theme exotica-theme espresso-theme emmet-mode dracula-theme doom-themes django-theme darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme company-web web-completion-data color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme chocolate-theme autothemer cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme add-node-modules-path lsp-mode ht dash-functional tide typescript-mode flycheck xterm-color web-beautify vue-mode edit-indirect ssass-mode vue-html-mode smeargle shell-pop orgit multi-term mmm-mode markdown-toc markdown-mode magit-gitflow magit-popup livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md fuzzy evil-magit magit git-commit with-editor transient eshell-z eshell-prompt-extras esh-help diff-hl company-statistics company coffee-mode auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired f evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))
-      '(tool-bar-mode nil)
-  )
-  (custom-set-faces
-   ;; custom-set-faces was added by Custom.
-   ;; If you edit it by hand, you could mess it up, so be careful.
-   ;; Your init file should contain only one such instance.
-   ;; If there is more than one, they won't work right.
-   '(helm-selection ((t (:extend t :background "VioletRed4" :foreground "gray100" :inverse-video nil)))))
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(hl-todo-keyword-faces
+   '(("TODO" . "#dc752f")
+     ("NEXT" . "#dc752f")
+     ("THEM" . "#2d9574")
+     ("PROG" . "#4f97d7")
+     ("OKAY" . "#4f97d7")
+     ("DONT" . "#f2241f")
+     ("FAIL" . "#f2241f")
+     ("DONE" . "#86dc2f")
+     ("NOTE" . "#b1951d")
+     ("KLUDGE" . "#b1951d")
+     ("HACK" . "#b1951d")
+     ("TEMP" . "#b1951d")
+     ("FIXME" . "#dc752f")
+     ("XXX+" . "#dc752f")
+     ("\\?\\?\\?+" . "#dc752f")))
+ '(package-selected-packages
+   '(zenburn-theme zen-and-art-theme white-sand-theme web-mode underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme tagedit sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme slim-mode seti-theme scss-mode sass-mode reverse-theme rebecca-theme railscasts-theme purple-haze-theme pug-mode professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme modus-vivendi-theme modus-operandi-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme kaolin-themes jbeans-theme jazz-theme ir-black-theme inkpot-theme impatient-mode htmlize heroku-theme hemisu-theme helm-css-scss hc-zenburn-theme haml-mode gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme farmhouse-theme eziam-theme exotica-theme espresso-theme emmet-mode dracula-theme doom-themes django-theme darktooth-theme darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme company-web web-completion-data color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme chocolate-theme autothemer cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme add-node-modules-path lsp-mode ht dash-functional tide typescript-mode flycheck xterm-color web-beautify vue-mode edit-indirect ssass-mode vue-html-mode smeargle shell-pop orgit multi-term mmm-mode markdown-toc markdown-mode magit-gitflow magit-popup livid-mode skewer-mode simple-httpd json-mode json-snatcher json-reformat js2-refactor multiple-cursors js2-mode js-doc helm-gitignore helm-company helm-c-yasnippet gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter gh-md fuzzy evil-magit magit git-commit with-editor transient eshell-z eshell-prompt-extras esh-help diff-hl company-statistics company coffee-mode auto-yasnippet yasnippet ac-ispell auto-complete ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired f evil-tutor evil-surround evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state smartparens evil-indent-plus evil-iedit-state iedit evil-exchange evil-escape evil-ediff evil-args evil-anzu anzu evil goto-chg undo-tree eval-sexp-fu elisp-slime-nav dumb-jump dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line helm avy helm-core popup async))
+ )
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(helm-selection ((t (:extend t :background "VioletRed4" :foreground "gray100" :inverse-video nil)))))
 )
