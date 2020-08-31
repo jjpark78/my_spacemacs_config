@@ -34,6 +34,9 @@
               ibuffer-group-buffers-by 'project)
      ;; better-defaults
      emacs-lisp
+     (version-control :variables
+                      version-control-diff-side 'left
+                      version-control-global-margin t)
      (git)
      (github)
      markdown
@@ -63,7 +66,6 @@
           lsp-headerline-breadcrumb-enable t
           vue-backend 'lsp)
      (node :variables node-add-modules-path t)
-     version-control
      (treemacs :variables
                treemacs-use-filewatch-mode t
                treemacs-use-follow-mode t
@@ -84,6 +86,8 @@
      rg
      carbon-now-sh
      dimmer
+     all-the-icons
+     spaceline-all-the-icons
      ;; quelpa
      ;; company-tabnine
      ;; company-quickhelp
@@ -121,8 +125,7 @@
                                :size 14
                                :weight normal
                                :width normal
-                               :powerline-offset 2
-                               :powerline-scale 1.5)
+                               :powerline-scale 1.0)
    dotspacemacs-leader-key "SPC"
    dotspacemacs-emacs-command-key "SPC"
    dotspacemacs-emacs-leader-key "M-m"
@@ -292,29 +295,41 @@
 
   ;; misc config
   (setq global-auto-revert-non-file-buffers t)
-  (setq auto-revert-verbose nil)
+  (setq auto-revert-check-vc-info t)
+  (setq auto-revert-verbose t)
   (setq revert-without-query '(".*"))
   (setq tab-always-indent t)
   (setq auth-sources '("~/.config/authrc"))
 
   ;;make spaceline more lighten
-  (with-eval-after-load 'spaceline-segments
-    (spaceline-toggle-anzu-off)
-    (spaceline-toggle-battery-off)
-    (spaceline-toggle-buffer-position-on)
-    (spaceline-toggle-point-position-on)
-    (spaceline-toggle-persp-name-off)
+  ;; (with-eval-after-load 'spaceline-segments
+  ;;   (spaceline-toggle-anzu-off)
+  ;;   (spaceline-toggle-battery-off)
+  ;;   (spaceline-toggle-buffer-position-on)
+  ;;   (spaceline-toggle-point-position-on)
+  ;;   (spaceline-toggle-persp-name-off)
+  ;;   (spaceline-toggle-minor-modes-off)
+  ;;   (spaceline-toggle-buffer-size-off))
+
+  (use-package all-the-icons
+    :ensure t
+    )
+  (use-package spaceline-all-the-icons
+    :after spaceline
+    :config
+    (spaceline-toggle-nyan-cat-on)
     (spaceline-toggle-all-the-icons-vc-status-on)
-    (spaceline-toggle-all-the-icons-git-status-on)
+    (spaceline-toggle-all-the-icons-git-status-off)
     (spaceline-toggle-all-the-icons-vc-icon-on)
-    (spaceline-toggle-minor-modes-off)
-    (spaceline-toggle-buffer-size-off))
+    (spaceline-toggle-all-the-icons-buffer-path-off)
+    (setq spaceline-all-the-icons-separator-type 'arrow)
+    (spaceline-all-the-icons-theme))
 
   ;; let diff to delta mode
   (magit-delta-mode)
 
   ;; powerline seperator
-  (setq dotspacemacs-mode-line-theme '(all-the-icons :separator 'slant))
+  ;; (setq dotspacemacs-mode-line-theme '(all-the-icons :separator 'wave))
 
   ;; activate beacon
   (beacon-mode 1)
@@ -324,7 +339,7 @@
   (prefer-coding-system 'utf-8)
 
   ;; only use magit
-  (setq vc-handled-backends nil)
+  ;; (setq vc-handled-backends nil)
 
   ;; vc, magit config
   (setq vc-follow-symlinks t)
