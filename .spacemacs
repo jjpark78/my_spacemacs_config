@@ -15,7 +15,7 @@
                       auto-completion-tab-key-behavior 'cycle
                       auto-completion-complete-with-key-sequence-delay 0
                       auto-completion-enable-snippets-in-popup t
-                      auto-completion-usr-company-box t
+                      auto-completion-use-company-box t
                       auto-completion-enable-sort-by-usage t
                       )
                       ;; auto-completion-enable-tabnine t)
@@ -35,13 +35,13 @@
      ;; better-defaults
      emacs-lisp
      (version-control :variables
-                      version-control-diff-side 'left
                       version-control-global-margin t)
      (git)
      (github)
      markdown
      evil-snipe
      lsp
+     (ranger)
      (org :variables
           org-enable-github-support t
           org-enable-bootstrap-support t
@@ -88,8 +88,9 @@
      dimmer
      all-the-icons
      spaceline-all-the-icons
+     company-box
      ;; quelpa
-     ;; company-tabnine
+     company-tabnine
      ;; company-quickhelp
    )
    dotspacemacs-frozen-packages '()
@@ -230,13 +231,6 @@
   ;; make support CamelCase Syntax
   (global-subword-mode 1)
 
-  (spacemacs|do-after-display-system-init
-   (setq powerline-default-separator 'slant))
-
-  ;; display time globally
-  (spaceline-define-segment datetime
-    (shell-command-to-string "echo -n $(date +'%Y-%m-%d %a %T')"))
-  (spaceline-spacemacs-theme 'datetime)
   ;; load previous window position
   ;; Restore Frame size and location, if we are using gui emacs
   (add-hook 'after-init-hook 'load-framegeometry)
@@ -245,7 +239,7 @@
   ;; setup lsp fine tune
   (setq gc-cons-threshold 100000000)
   (setq read-process-output-max (* 1024 1024)) ;; 1mb
-  (setq lsp-idle-delay 0.500)
+  (setq lsp-idle-delay 0.100)
 
   ;;iedit bug
   ;;need to wait for https://github.com/syl20bnr/evil-iedit-state/issues/27 releases
@@ -257,7 +251,6 @@
   ;; disable indent-guide in visual mode
   ;; (add-hook 'evil-visual-state-entry-hook #'spacemacs/toggle-indent-guide-off)
   ;; (add-hook 'evil-visual-state-exit-hook #'spacemacs/toggle-indent-guide-on)
-
   ;;line number style
   (setq-default
    display-line-numbers-width 5
@@ -277,6 +270,7 @@
 
   ;; nyan-mode
   (nyan-mode)
+  (setq nyan-bar-length 10)
   (nyan-start-animation)
 
   ;; add icons to helm
@@ -317,10 +311,13 @@
   (use-package spaceline-all-the-icons
     :after spaceline
     :config
-    (spaceline-toggle-nyan-cat-on)
+    (spaceline-toggle-all-the-icons-nyan-cat-on)
     (spaceline-toggle-all-the-icons-vc-status-on)
+    (spaceline-toggle-major-mode-off)
     (spaceline-toggle-all-the-icons-git-status-off)
     (spaceline-toggle-all-the-icons-vc-icon-on)
+    ;; (spaceline-toggle-all-the-icons-temperature-on)
+    ;; (spaceline-toggle-all-the-icons-weather-on)
     (spaceline-toggle-all-the-icons-buffer-path-off)
     (setq spaceline-all-the-icons-separator-type 'arrow)
     (spaceline-all-the-icons-theme))
@@ -328,8 +325,7 @@
   ;; let diff to delta mode
   (magit-delta-mode)
 
-  ;; powerline seperator
-  ;; (setq dotspacemacs-mode-line-theme '(all-the-icons :separator 'wave))
+  (setq company-box-icons-alist 'company-box-icons-idea)
 
   ;; activate beacon
   (beacon-mode 1)
@@ -348,6 +344,10 @@
   (setq magit-rewrite-inclusive 'ask)
   (setq magit-save-some-buffers t)
   (setq magit-set-upstream-on-push 'askifnotset)
+
+  ;; autocomplete company-box setup
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
 
   ;; rg setup
   (setq rg-group-result t)
@@ -372,6 +372,7 @@
   ;; buffer list
   ;; doom emacs style
   (spacemacs/set-leader-keys "," 'helm-projectile-switch-to-buffer)
+  (spacemacs/set-leader-keys "." 'helm-projectile-find-file)
   ;; for emacsclient and daemon mode
 
   (spacemacs/set-leader-keys "qq" 'spacemacs/frame-killer)
@@ -400,25 +401,18 @@
 
   ;; setup rg binding
   (spacemacs/set-leader-keys "rg" 'rg-project)
-
   ;; setup edit shell config file shortcut
   (spacemacs/set-leader-keys "fz" 'er-find-shell-init-file)
 
   ;; setup carbon now sh binding
   (spacemacs/set-leader-keys "cB" 'carbon-now-sh)
 
+  ;; setup deer dual pane
+  (spacemacs/set-leader-keys "-" 'deer-dual-pane)
+
   ;; setup wakatime api key
   (load "~/.config/spacemacs/wakatime")
 
-  ;; setup centaur tab
-  ;; (use-package centaur-tabs
-  ;;   :ensure t
-  ;;   :demand
-  ;;   :config
-  ;;   (centaur-tabs-mode t)
-  ;;   )
-  ;; (global-set-key (kbd "gt")  'centaur-tabs-forward)
-  ;; (global-set-key (kbd "gT")  'centaur-tabs-backward)
   )
 
 (defun dotspacemacs/emacs-custom-settings ()
