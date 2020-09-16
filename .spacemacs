@@ -1,7 +1,6 @@
 ;; -*- mode: emacs-lisp -*-
 ;; This file is loaded by Spacemacs at startup.
 ;; It must be stored in your home directory.
-
 (defun dotspacemacs/layers ()
   (setq-default
    dotspacemacs-distribution 'spacemacs
@@ -21,12 +20,12 @@
                       ;; auto-completion-enable-tabnine t)
      (javascript :variables
                  javascript-indent-level 2
-                 lsp-headerline-breadcrumb-enable t
+                 lsp-headerline-breadcrumb-enable nil
                  javascript-backend 'lsp)
      (typescript :variables
                  typescript-indent-level 2
                  typescript-backend 'lsp
-                 lsp-headerline-breadcrumb-enable t
+                 lsp-headerline-breadcrumb-enable nil
                  typescript-linter 'eslint
                  typescript-fmt-tool 'prettier)
      helm
@@ -320,7 +319,13 @@
     ;; (spaceline-toggle-all-the-icons-weather-on)
     (spaceline-toggle-all-the-icons-buffer-path-off)
     (setq spaceline-all-the-icons-separator-type 'arrow)
+    (setq display-time-day-and-date t)
     (spaceline-all-the-icons-theme))
+
+  ;; display time globally
+  (spaceline-define-segment datetime
+    (shell-command-to-string "echo -n $(date +'%Y-%m-%d %a %T')"))
+  ;; (spaceline-spacemacs-theme 'datetime)
 
   ;; let diff to delta mode
   (magit-delta-mode)
@@ -375,8 +380,8 @@
   (spacemacs/set-leader-keys "." 'helm-projectile-find-file)
   ;; for emacsclient and daemon mode
 
-  (spacemacs/set-leader-keys "qq" 'spacemacs/frame-killer)
   (spacemacs/set-leader-keys "," 'helm-projectile-switch-to-buffer)
+
   ;; move line head, end faster
   (evil-global-set-key 'normal "H" 'evil-first-non-blank)
   (evil-global-set-key 'visual "H" 'evil-first-non-blank)
